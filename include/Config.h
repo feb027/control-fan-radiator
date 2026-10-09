@@ -19,8 +19,8 @@
 // RELAY SETTINGS
 // ==========================================
 // Sebagian besar modul relay Arduino aktif LOW (LOW = Relay ON, HIGH = Relay OFF).
-// Set ke false jika menggunakan relay aktif HIGH.
-#define RELAY_ACTIVE_LOW    true
+// Diubah ke false (Active HIGH) karena menggunakan rangkaian driver transistor NPN (2N2222 / BC337).
+#define RELAY_ACTIVE_LOW    false
 
 // ==========================================
 // DEFAULT TEMPERATURE SETPOINTS (°C)
