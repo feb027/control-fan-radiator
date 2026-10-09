@@ -10,6 +10,7 @@ bool DisplayManager::begin() {
     if (!display.begin(SSD1306_SWITCHCAPVCC, OLED_I2C_ADDRESS)) {
         return false;
     }
+    display.setRotation(OLED_ROTATION); // Balik tampilan 180 derajat
     display.clearDisplay();
     display.setTextColor(SSD1306_WHITE);
     return true;

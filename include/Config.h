@@ -59,6 +59,7 @@
 #define SCREEN_HEIGHT       32
 #define OLED_RESET_PIN      -1
 #define OLED_I2C_ADDRESS    0x3C          // Alamat I2C umum OLED 0.91" (0x3C atau 0x3D)
+#define OLED_ROTATION       2             // 0: Normal, 2: Dibalik 180 derajat (Upside-down)
 
 // ==========================================
 // EEPROM STORAGE CONFIG
