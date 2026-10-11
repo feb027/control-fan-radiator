@@ -31,9 +31,9 @@
 // 3-ZONE CALIBRATION OFFSETS (TENTHS OF °C)
 // ==========================================
 // Disimpan dalam satuan 0.1°C (-100 = -10.0°C)
-#define DEFAULT_TEMP_OFFSET_1    -100  // Offset Zona 1 (Acuan ~50°C / Rentang 40-60°C)
-#define DEFAULT_TEMP_OFFSET_2    -100  // Offset Zona 2 (Acuan ~70°C / Rentang 60-80°C)
-#define DEFAULT_TEMP_OFFSET_3    -100  // Offset Zona 3 (Acuan ~90°C / Rentang >80°C)
+#define DEFAULT_TEMP_OFFSET_1    -100  // Offset Zona 1 (Rentang 60-80°C)
+#define DEFAULT_TEMP_OFFSET_2    -100  // Offset Zona 2 (Rentang 80-90°C)
+#define DEFAULT_TEMP_OFFSET_3    -100  // Offset Zona 3 (Rentang >90°C)
 
 #define MIN_ALLOWABLE_OFFSET     -250  // Batas minimum kalibrasi (-25.0°C)
 #define MAX_ALLOWABLE_OFFSET      150  // Batas maksimum kalibrasi (+15.0°C)

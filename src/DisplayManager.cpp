@@ -131,11 +131,11 @@ void DisplayManager::renderMenuOffset(uint8_t zoneIndex, int16_t offsetTenths, c
     display.setCursor(0, 0);
 
     if (zoneIndex == 1) {
-        display.print(F("CAL1:40-60C "));
+        display.print(F("CAL1:60-80C "));
     } else if (zoneIndex == 2) {
-        display.print(F("CAL2:60-80C "));
+        display.print(F("CAL2:80-90C "));
     } else {
-        display.print(F("CAL3:>80C   "));
+        display.print(F("CAL3:>90C   "));
     }
 
     display.print(F("T:"));

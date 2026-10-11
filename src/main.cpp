@@ -72,7 +72,7 @@ void handleMenuNavigation() {
                     settings.tempLower--;
                 }
             } else if (evtA == BTN_EVENT_LONG_PRESS) {
-                // Tekan tahan A untuk lanjut ke kalibrasi offset zona 1 (40-60°C)
+                // Tekan tahan A untuk lanjut ke kalibrasi offset zona 1 (60-80°C)
                 currentMenu = MENU_CALIBRATE_OFFSET_1;
             } else if (evtB == BTN_EVENT_LONG_PRESS) {
                 storage.saveSettings();
@@ -90,7 +90,7 @@ void handleMenuNavigation() {
                     settings.tempOffset1 -= OFFSET_STEP_TENTHS;
                 }
             } else if (evtA == BTN_EVENT_LONG_PRESS) {
-                // Tekan tahan A untuk lanjut ke kalibrasi offset zona 2 (60-80°C)
+                // Tekan tahan A untuk lanjut ke kalibrasi offset zona 2 (80-90°C)
                 currentMenu = MENU_CALIBRATE_OFFSET_2;
             } else if (evtB == BTN_EVENT_LONG_PRESS) {
                 storage.saveSettings();
@@ -108,7 +108,7 @@ void handleMenuNavigation() {
                     settings.tempOffset2 -= OFFSET_STEP_TENTHS;
                 }
             } else if (evtA == BTN_EVENT_LONG_PRESS) {
-                // Tekan tahan A untuk lanjut ke kalibrasi offset zona 3 (>80°C)
+                // Tekan tahan A untuk lanjut ke kalibrasi offset zona 3 (>90°C)
                 currentMenu = MENU_CALIBRATE_OFFSET_3;
             } else if (evtB == BTN_EVENT_LONG_PRESS) {
                 storage.saveSettings();

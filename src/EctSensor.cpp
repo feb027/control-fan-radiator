@@ -93,14 +93,20 @@ float EctSensor::adcToTemperature(float adcVal) {
 }
 
 float EctSensor::calculateInterpolatedOffset(float rawTemp, float o1, float o2, float o3) {
-    // Titik acuan zona: 50.0°C (Offset 1), 70.0°C (Offset 2), 90.0°C (Offset 3)
-    if (rawTemp <= 50.0f) {
+    // Zona 1: 60 - 80°C (efektif penuh di <= 78°C)
+    // Transisi 1: 78 - 82°C (smooth blending Zona 1 ke Zona 2 di sekitar batas 80°C)
+    // Zona 2: 80 - 90°C (efektif penuh di 82 - 88°C)
+    // Transisi 2: 88 - 92°C (smooth blending Zona 2 ke Zona 3 di sekitar batas 90°C)
+    // Zona 3: > 90°C (efektif penuh di >= 92°C)
+    if (rawTemp <= 78.0f) {
         return o1;
-    } else if (rawTemp <= 70.0f) {
-        float factor = (rawTemp - 50.0f) / 20.0f;
+    } else if (rawTemp < 82.0f) {
+        float factor = (rawTemp - 78.0f) / 4.0f;
         return o1 + factor * (o2 - o1);
-    } else if (rawTemp <= 90.0f) {
-        float factor = (rawTemp - 70.0f) / 20.0f;
+    } else if (rawTemp <= 88.0f) {
+        return o2;
+    } else if (rawTemp < 92.0f) {
+        float factor = (rawTemp - 88.0f) / 4.0f;
         return o2 + factor * (o3 - o2);
     } else {
         return o3;
