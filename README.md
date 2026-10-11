@@ -35,7 +35,7 @@ Sistem pengontrol darurat kipas radiator (*radiator fan*) untuk Honda CR-V Gener
 | **OLED VCC / GND** | `5V` / `GND` | Catu daya layar |
 | **Tombol A (Set / +)**| `D2` | Tombol push-button ke `GND` (Internal Pull-Up) |
 | **Tombol B (Next / -)**| `D3` | Tombol push-button ke `GND` (Internal Pull-Up) |
-| **Driver Relay 12V** | `D7` | Masuk ke Resistor 1kΩ -> Base Transistor NPN (2N2222) (Active HIGH) |
+| **Modul Relay Fan** | `D7` | Masuk ke pin `IN` modul relay (Active LOW) |
 
 ### Rangkaian Driver Relay 12V (NPN Transistor)
 ```
