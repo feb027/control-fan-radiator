@@ -8,7 +8,7 @@ class EctSensor {
 public:
     EctSensor(uint8_t pin);
     void begin();
-    void update(int8_t tempOffset);
+    void update(int16_t offset1, int16_t offset2, int16_t offset3);
     const SensorData& getData() const;
 
 private:
@@ -18,6 +18,7 @@ private:
     bool isFirstRead;
 
     float adcToTemperature(float adcVal);
+    float calculateInterpolatedOffset(float rawTemp, float o1, float o2, float o3);
     void checkSafetyThresholds(uint16_t adcVal);
 };
 

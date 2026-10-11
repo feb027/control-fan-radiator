@@ -72,22 +72,58 @@ void handleMenuNavigation() {
                     settings.tempLower--;
                 }
             } else if (evtA == BTN_EVENT_LONG_PRESS) {
-                // Tekan tahan A untuk lanjut ke kalibrasi offset
-                currentMenu = MENU_CALIBRATE_OFFSET;
+                // Tekan tahan A untuk lanjut ke kalibrasi offset zona 1 (40-60°C)
+                currentMenu = MENU_CALIBRATE_OFFSET_1;
             } else if (evtB == BTN_EVENT_LONG_PRESS) {
                 storage.saveSettings();
                 currentMenu = MENU_DASHBOARD;
             }
             break;
 
-        case MENU_CALIBRATE_OFFSET:
+        case MENU_CALIBRATE_OFFSET_1:
             if (evtA == BTN_EVENT_SHORT_PRESS) {
-                if (settings.tempOffset < 20) {
-                    settings.tempOffset++;
+                if (settings.tempOffset1 < MAX_ALLOWABLE_OFFSET) {
+                    settings.tempOffset1 += OFFSET_STEP_TENTHS;
                 }
             } else if (evtB == BTN_EVENT_SHORT_PRESS) {
-                if (settings.tempOffset > -20) {
-                    settings.tempOffset--;
+                if (settings.tempOffset1 > MIN_ALLOWABLE_OFFSET) {
+                    settings.tempOffset1 -= OFFSET_STEP_TENTHS;
+                }
+            } else if (evtA == BTN_EVENT_LONG_PRESS) {
+                // Tekan tahan A untuk lanjut ke kalibrasi offset zona 2 (60-80°C)
+                currentMenu = MENU_CALIBRATE_OFFSET_2;
+            } else if (evtB == BTN_EVENT_LONG_PRESS) {
+                storage.saveSettings();
+                currentMenu = MENU_DASHBOARD;
+            }
+            break;
+
+        case MENU_CALIBRATE_OFFSET_2:
+            if (evtA == BTN_EVENT_SHORT_PRESS) {
+                if (settings.tempOffset2 < MAX_ALLOWABLE_OFFSET) {
+                    settings.tempOffset2 += OFFSET_STEP_TENTHS;
+                }
+            } else if (evtB == BTN_EVENT_SHORT_PRESS) {
+                if (settings.tempOffset2 > MIN_ALLOWABLE_OFFSET) {
+                    settings.tempOffset2 -= OFFSET_STEP_TENTHS;
+                }
+            } else if (evtA == BTN_EVENT_LONG_PRESS) {
+                // Tekan tahan A untuk lanjut ke kalibrasi offset zona 3 (>80°C)
+                currentMenu = MENU_CALIBRATE_OFFSET_3;
+            } else if (evtB == BTN_EVENT_LONG_PRESS) {
+                storage.saveSettings();
+                currentMenu = MENU_DASHBOARD;
+            }
+            break;
+
+        case MENU_CALIBRATE_OFFSET_3:
+            if (evtA == BTN_EVENT_SHORT_PRESS) {
+                if (settings.tempOffset3 < MAX_ALLOWABLE_OFFSET) {
+                    settings.tempOffset3 += OFFSET_STEP_TENTHS;
+                }
+            } else if (evtB == BTN_EVENT_SHORT_PRESS) {
+                if (settings.tempOffset3 > MIN_ALLOWABLE_OFFSET) {
+                    settings.tempOffset3 -= OFFSET_STEP_TENTHS;
                 }
             } else if (evtA == BTN_EVENT_LONG_PRESS || evtB == BTN_EVENT_LONG_PRESS) {
                 // Simpan ke EEPROM dan kembali ke dashboard
@@ -111,13 +147,22 @@ void printSerialLog() {
 
     Serial.print(F("[CR-V ECT] Suhu: "));
     Serial.print(sensor.temperature, 1);
-    Serial.print(F(" C | Volt: "));
+    Serial.print(F(" C (Raw: "));
+    Serial.print(sensor.rawTemperature, 1);
+    Serial.print(F(" C) | Volt: "));
     Serial.print(sensor.rawVoltage, 2);
     Serial.print(F("V (ADC: "));
     Serial.print(sensor.rawAdc);
-    Serial.print(F(") | Offset: "));
-    Serial.print(settings.tempOffset);
-    Serial.print(F("C | Fan: "));
+    Serial.print(F(") | Offset Aktif: "));
+    if (sensor.currentOffset >= 0) Serial.print(F("+"));
+    Serial.print(sensor.currentOffset, 1);
+    Serial.print(F("C [O1:"));
+    Serial.print((float)settings.tempOffset1 / 10.0f, 1);
+    Serial.print(F(" O2:"));
+    Serial.print((float)settings.tempOffset2 / 10.0f, 1);
+    Serial.print(F(" O3:"));
+    Serial.print((float)settings.tempOffset3 / 10.0f, 1);
+    Serial.print(F("] | Fan: "));
     Serial.print(relayController.isFanOn() ? F("ON") : F("OFF"));
     if (!sensor.isValid) {
         Serial.print(F(" | ! FAIL-SAFE ACTIVE !"));
@@ -156,7 +201,8 @@ void loop() {
     // 2. Sampling sensor ECT (setiap 50ms)
     if (currentMillis - lastSensorTime >= INTERVAL_SENSOR_SAMPLE_MS) {
         lastSensorTime = currentMillis;
-        ectSensor.update(storage.getSettings().tempOffset);
+        const SystemSettings& settings = storage.getSettings();
+        ectSensor.update(settings.tempOffset1, settings.tempOffset2, settings.tempOffset3);
     }
 
     // 3. Evaluasi logika Fan Relay (setiap 100ms)

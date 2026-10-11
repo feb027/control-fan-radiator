@@ -36,6 +36,8 @@ static const uint8_t LUT_SIZE = sizeof(HONDA_ECT_LUT) / sizeof(HONDA_ECT_LUT[0])
 EctSensor::EctSensor(uint8_t pin) 
     : sensorPin(pin), filteredAdc(0.0f), isFirstRead(true) {
     data.temperature = 0.0f;
+    data.rawTemperature = 0.0f;
+    data.currentOffset = 0.0f;
     data.rawVoltage = 0.0f;
     data.rawAdc = 0;
     data.isValid = false;
@@ -90,7 +92,22 @@ float EctSensor::adcToTemperature(float adcVal) {
     return 25.0f; // Default fallback
 }
 
-void EctSensor::update(int8_t tempOffset) {
+float EctSensor::calculateInterpolatedOffset(float rawTemp, float o1, float o2, float o3) {
+    // Titik acuan zona: 50.0°C (Offset 1), 70.0°C (Offset 2), 90.0°C (Offset 3)
+    if (rawTemp <= 50.0f) {
+        return o1;
+    } else if (rawTemp <= 70.0f) {
+        float factor = (rawTemp - 50.0f) / 20.0f;
+        return o1 + factor * (o2 - o1);
+    } else if (rawTemp <= 90.0f) {
+        float factor = (rawTemp - 70.0f) / 20.0f;
+        return o2 + factor * (o3 - o2);
+    } else {
+        return o3;
+    }
+}
+
+void EctSensor::update(int16_t offset1, int16_t offset2, int16_t offset3) {
     // Multisample 4x untuk meredam noise frekuensi tinggi
     uint32_t adcSum = 0;
     for (uint8_t i = 0; i < 4; ++i) {
@@ -113,10 +130,18 @@ void EctSensor::update(int8_t tempOffset) {
     }
 
     if (data.isValid) {
-        float calculatedTemp = adcToTemperature(filteredAdc);
-        data.temperature = calculatedTemp + (float)tempOffset;
+        float rawTemp = adcToTemperature(filteredAdc);
+        float o1 = (float)offset1 / 10.0f;
+        float o2 = (float)offset2 / 10.0f;
+        float o3 = (float)offset3 / 10.0f;
+
+        data.rawTemperature = rawTemp;
+        data.currentOffset = calculateInterpolatedOffset(rawTemp, o1, o2, o3);
+        data.temperature = data.rawTemperature + data.currentOffset;
     } else {
         // Jika sensor error, set suhu ke nilai darurat tinggi (120°C)
+        data.rawTemperature = 120.0f;
+        data.currentOffset = 0.0f;
         data.temperature = 120.0f;
     }
 }

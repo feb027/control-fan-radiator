@@ -38,7 +38,9 @@ bool Storage::isValid(const SystemSettings& data) {
     if (data.tempUpper <= data.tempLower) return false;
     if (data.tempLower < MIN_ALLOWABLE_TEMP_LOWER) return false;
     if (data.tempUpper > MAX_ALLOWABLE_TEMP_UPPER) return false;
-    if (data.tempOffset < -25 || data.tempOffset > 25) return false;
+    if (data.tempOffset1 < MIN_ALLOWABLE_OFFSET || data.tempOffset1 > MAX_ALLOWABLE_OFFSET) return false;
+    if (data.tempOffset2 < MIN_ALLOWABLE_OFFSET || data.tempOffset2 > MAX_ALLOWABLE_OFFSET) return false;
+    if (data.tempOffset3 < MIN_ALLOWABLE_OFFSET || data.tempOffset3 > MAX_ALLOWABLE_OFFSET) return false;
     return true;
 }
 
@@ -59,6 +61,8 @@ void Storage::resetToDefaults() {
     settings.magicKey = EEPROM_MAGIC_KEY;
     settings.tempUpper = DEFAULT_TEMP_UPPER;
     settings.tempLower = DEFAULT_TEMP_LOWER;
-    settings.tempOffset = DEFAULT_TEMP_OFFSET;
+    settings.tempOffset1 = DEFAULT_TEMP_OFFSET_1;
+    settings.tempOffset2 = DEFAULT_TEMP_OFFSET_2;
+    settings.tempOffset3 = DEFAULT_TEMP_OFFSET_3;
     settings.checksum = calculateChecksum(settings);
 }

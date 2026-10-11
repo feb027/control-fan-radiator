@@ -125,18 +125,50 @@ void DisplayManager::renderMenuLower(const SystemSettings& settings) {
     display.print(F(" C ]"));
 }
 
-void DisplayManager::renderMenuOffset(const SensorData& sensor, const SystemSettings& settings) {
+void DisplayManager::renderMenuOffset(uint8_t zoneIndex, int16_t offsetTenths, const SensorData& sensor) {
     display.setTextSize(1);
     display.setTextColor(SSD1306_WHITE);
     display.setCursor(0, 0);
-    display.print(F("KALIBRASI OFFSET"));
+
+    if (zoneIndex == 1) {
+        display.print(F("CAL1:40-60C "));
+    } else if (zoneIndex == 2) {
+        display.print(F("CAL2:60-80C "));
+    } else {
+        display.print(F("CAL3:>80C   "));
+    }
+
+    display.print(F("T:"));
+    if (sensor.isValid) {
+        if (sensor.temperature >= 100.0f) {
+            display.print((int)sensor.temperature);
+        } else {
+            display.print(sensor.temperature, 1);
+        }
+        display.print((char)247);
+        display.print(F("C"));
+    } else {
+        display.print(F("ERR"));
+    }
 
     display.setTextSize(2);
-    display.setCursor(16, 12);
-    display.print(F("[ "));
-    if (settings.tempOffset > 0) display.print(F("+"));
-    display.print(settings.tempOffset);
-    display.print(F(" C ]"));
+    display.setCursor(10, 12);
+    display.print(F("["));
+    if (offsetTenths > 0) {
+        display.print(F("+"));
+    } else if (offsetTenths < 0) {
+        display.print(F("-"));
+    } else {
+        display.print(F(" "));
+    }
+    int16_t absVal = abs(offsetTenths);
+    if (absVal < 100) {
+        display.print(F(" "));
+    }
+    display.print(absVal / 10);
+    display.print(F("."));
+    display.print(absVal % 10);
+    display.print(F(" C]"));
 }
 
 void DisplayManager::update(MenuState menuState, const SensorData& sensor, const SystemSettings& settings, bool isFanOn) {
@@ -152,8 +184,14 @@ void DisplayManager::update(MenuState menuState, const SensorData& sensor, const
         case MENU_SET_TEMP_LOWER:
             renderMenuLower(settings);
             break;
-        case MENU_CALIBRATE_OFFSET:
-            renderMenuOffset(sensor, settings);
+        case MENU_CALIBRATE_OFFSET_1:
+            renderMenuOffset(1, settings.tempOffset1, sensor);
+            break;
+        case MENU_CALIBRATE_OFFSET_2:
+            renderMenuOffset(2, settings.tempOffset2, sensor);
+            break;
+        case MENU_CALIBRATE_OFFSET_3:
+            renderMenuOffset(3, settings.tempOffset3, sensor);
             break;
     }
 

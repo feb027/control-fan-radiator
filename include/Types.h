@@ -7,7 +7,9 @@ enum MenuState {
     MENU_DASHBOARD = 0,
     MENU_SET_TEMP_UPPER,
     MENU_SET_TEMP_LOWER,
-    MENU_CALIBRATE_OFFSET
+    MENU_CALIBRATE_OFFSET_1,
+    MENU_CALIBRATE_OFFSET_2,
+    MENU_CALIBRATE_OFFSET_3
 };
 
 enum ButtonEvent {
@@ -20,12 +22,16 @@ struct SystemSettings {
     uint16_t magicKey;      // Pengenal validasi memori EEPROM
     int8_t tempUpper;       // Ambang batas Fan ON (°C)
     int8_t tempLower;       // Ambang batas Fan OFF (°C)
-    int8_t tempOffset;      // Kalibrasi offset (°C, rentang -20 sampai +20)
+    int16_t tempOffset1;    // Offset Zona 1 (dalam sepersepuluh °C, misal -100 = -10.0°C)
+    int16_t tempOffset2;    // Offset Zona 2 (dalam sepersepuluh °C)
+    int16_t tempOffset3;    // Offset Zona 3 (dalam sepersepuluh °C)
     uint8_t checksum;       // Checksum sederhana untuk integritas data
 };
 
 struct SensorData {
-    float temperature;      // Suhu terfilter setelah kalibrasi (°C)
+    float temperature;      // Suhu terfilter setelah kalibrasi 3-zona (°C)
+    float rawTemperature;   // Suhu mentah dari kurva sebelum kalibrasi (°C)
+    float currentOffset;    // Nilai offset aktif terinterpolasi (°C)
     float rawVoltage;       // Tegangan analog terukur (V)
     uint16_t rawAdc;        // Nilai ADC terukur (0 - 1023)
     bool isValid;           // True jika pembacaan sensor dalam batas wajar

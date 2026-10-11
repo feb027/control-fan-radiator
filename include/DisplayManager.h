@@ -19,7 +19,7 @@ private:
     void renderDashboard(const SensorData& sensor, const SystemSettings& settings, bool isFanOn);
     void renderMenuUpper(const SystemSettings& settings);
     void renderMenuLower(const SystemSettings& settings);
-    void renderMenuOffset(const SensorData& sensor, const SystemSettings& settings);
+    void renderMenuOffset(uint8_t zoneIndex, int16_t offsetTenths, const SensorData& sensor);
     void renderFailSafeAlert(const SensorData& sensor);
 };
 

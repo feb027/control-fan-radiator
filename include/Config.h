@@ -27,7 +27,18 @@
 // ==========================================
 #define DEFAULT_TEMP_UPPER       96   // Suhu batas atas (Fan ON)
 #define DEFAULT_TEMP_LOWER       90   // Suhu batas bawah (Fan OFF)
-#define DEFAULT_TEMP_OFFSET       0   // Offset kalibrasi awal (°C)
+
+// ==========================================
+// 3-ZONE CALIBRATION OFFSETS (TENTHS OF °C)
+// ==========================================
+// Disimpan dalam satuan 0.1°C (-100 = -10.0°C)
+#define DEFAULT_TEMP_OFFSET_1    -100  // Offset Zona 1 (Acuan ~50°C / Rentang 40-60°C)
+#define DEFAULT_TEMP_OFFSET_2    -100  // Offset Zona 2 (Acuan ~70°C / Rentang 60-80°C)
+#define DEFAULT_TEMP_OFFSET_3    -100  // Offset Zona 3 (Acuan ~90°C / Rentang >80°C)
+
+#define MIN_ALLOWABLE_OFFSET     -250  // Batas minimum kalibrasi (-25.0°C)
+#define MAX_ALLOWABLE_OFFSET      150  // Batas maksimum kalibrasi (+15.0°C)
+#define OFFSET_STEP_TENTHS          1  // Resolusi per klik: 0.1°C
 
 #define MIN_ALLOWABLE_TEMP_LOWER 70   // Batas minimum settingan Fan OFF
 #define MAX_ALLOWABLE_TEMP_UPPER 110  // Batas maksimum settingan Fan ON
@@ -64,7 +75,7 @@
 // ==========================================
 // EEPROM STORAGE CONFIG
 // ==========================================
-#define EEPROM_MAGIC_KEY    0x5443        // 'TC' (Temp Controller) Magic Word
+#define EEPROM_MAGIC_KEY    0x5433        // 'T3' (Temp 3-Zone Controller) Magic Word
 #define EEPROM_START_ADDR   0
 
 #endif // CONFIG_H
