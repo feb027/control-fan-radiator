@@ -2,7 +2,8 @@
 #include <Wire.h>
 
 DisplayManager::DisplayManager() 
-    : display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET_PIN) {}
+    : display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET_PIN),
+      isPoweredOn(true) {}
 
 bool DisplayManager::begin() {
     Wire.begin();
@@ -13,7 +14,22 @@ bool DisplayManager::begin() {
     display.setRotation(OLED_ROTATION); // Balik tampilan 180 derajat
     display.clearDisplay();
     display.setTextColor(SSD1306_WHITE);
+    isPoweredOn = true;
     return true;
+}
+
+void DisplayManager::setDisplayPower(bool on) {
+    if (isPoweredOn == on) return;
+    isPoweredOn = on;
+    if (isPoweredOn) {
+        display.ssd1306_command(SSD1306_DISPLAYON);
+    } else {
+        display.ssd1306_command(SSD1306_DISPLAYOFF);
+    }
+}
+
+bool DisplayManager::isDisplayOn() const {
+    return isPoweredOn;
 }
 
 void DisplayManager::showBootScreen() {
@@ -171,7 +187,27 @@ void DisplayManager::renderMenuOffset(uint8_t zoneIndex, int16_t offsetTenths, c
     display.print(F(" C]"));
 }
 
+void DisplayManager::renderMenuTimeout(const SystemSettings& settings) {
+    display.setTextSize(1);
+    display.setTextColor(SSD1306_WHITE);
+    display.setCursor(0, 0);
+    display.print(F("AUTO SLEEP OLED"));
+
+    display.setTextSize(2);
+    display.setCursor(4, 12);
+    display.print(F("[ "));
+    if (settings.oledTimeoutMin < 10) {
+        display.print(F(" "));
+    }
+    display.print(settings.oledTimeoutMin);
+    display.print(F(" MNT ]"));
+}
+
 void DisplayManager::update(MenuState menuState, const SensorData& sensor, const SystemSettings& settings, bool isFanOn) {
+    if (!isPoweredOn) {
+        return;
+    }
+
     display.clearDisplay();
 
     switch (menuState) {
@@ -192,6 +228,9 @@ void DisplayManager::update(MenuState menuState, const SensorData& sensor, const
             break;
         case MENU_CALIBRATE_OFFSET_3:
             renderMenuOffset(3, settings.tempOffset3, sensor);
+            break;
+        case MENU_SET_OLED_TIMEOUT:
+            renderMenuTimeout(settings);
             break;
     }
 

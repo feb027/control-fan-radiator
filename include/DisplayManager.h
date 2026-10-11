@@ -12,14 +12,18 @@ public:
     bool begin();
     void update(MenuState menuState, const SensorData& sensor, const SystemSettings& settings, bool isFanOn);
     void showBootScreen();
+    void setDisplayPower(bool on);
+    bool isDisplayOn() const;
 
 private:
     Adafruit_SSD1306 display;
+    bool isPoweredOn;
 
     void renderDashboard(const SensorData& sensor, const SystemSettings& settings, bool isFanOn);
     void renderMenuUpper(const SystemSettings& settings);
     void renderMenuLower(const SystemSettings& settings);
     void renderMenuOffset(uint8_t zoneIndex, int16_t offsetTenths, const SensorData& sensor);
+    void renderMenuTimeout(const SystemSettings& settings);
     void renderFailSafeAlert(const SensorData& sensor);
 };
 

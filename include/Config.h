@@ -63,7 +63,7 @@
 #define BUTTON_LONG_PRESS_MS        1000  // Durasi tahan tombol (1 detik)
 
 // ==========================================
-// OLED SPECIFICATIONS
+// OLED SPECIFICATIONS & AUTO-SLEEP
 // ==========================================
 #define SCREEN_WIDTH        128
 #define SCREEN_HEIGHT       32
@@ -71,10 +71,14 @@
 #define OLED_I2C_ADDRESS    0x3C          // Alamat I2C umum OLED 0.91" (0x3C atau 0x3D)
 #define OLED_ROTATION       2             // 0: Normal, 2: Dibalik 180 derajat (Upside-down)
 
+#define DEFAULT_OLED_TIMEOUT_MIN   2      // Waktu tunggu auto-sleep default (2 menit)
+#define MIN_OLED_TIMEOUT_MIN       1      // Batas terendah auto-sleep (1 menit)
+#define MAX_OLED_TIMEOUT_MIN      30      // Batas tertinggi auto-sleep (30 menit / setengah jam)
+
 // ==========================================
 // EEPROM STORAGE CONFIG
 // ==========================================
-#define EEPROM_MAGIC_KEY    0x5433        // 'T3' (Temp 3-Zone Controller) Magic Word
+#define EEPROM_MAGIC_KEY    0x5435        // 'T5' (Temp Controller + OLED Sleep)
 #define EEPROM_START_ADDR   0
 
 #endif // CONFIG_H

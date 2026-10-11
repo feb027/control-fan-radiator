@@ -41,6 +41,7 @@ bool Storage::isValid(const SystemSettings& data) {
     if (data.tempOffset1 < MIN_ALLOWABLE_OFFSET || data.tempOffset1 > MAX_ALLOWABLE_OFFSET) return false;
     if (data.tempOffset2 < MIN_ALLOWABLE_OFFSET || data.tempOffset2 > MAX_ALLOWABLE_OFFSET) return false;
     if (data.tempOffset3 < MIN_ALLOWABLE_OFFSET || data.tempOffset3 > MAX_ALLOWABLE_OFFSET) return false;
+    if (data.oledTimeoutMin < MIN_OLED_TIMEOUT_MIN || data.oledTimeoutMin > MAX_OLED_TIMEOUT_MIN) return false;
     return true;
 }
 
@@ -64,5 +65,6 @@ void Storage::resetToDefaults() {
     settings.tempOffset1 = DEFAULT_TEMP_OFFSET_1;
     settings.tempOffset2 = DEFAULT_TEMP_OFFSET_2;
     settings.tempOffset3 = DEFAULT_TEMP_OFFSET_3;
+    settings.oledTimeoutMin = DEFAULT_OLED_TIMEOUT_MIN;
     settings.checksum = calculateChecksum(settings);
 }

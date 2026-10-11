@@ -18,6 +18,8 @@ DisplayManager displayManager;
 // State navigasi sistem
 MenuState currentMenu = MENU_DASHBOARD;
 unsigned long lastMenuInteraction = 0;
+unsigned long lastUserActivityTime = 0;
+bool lastFanState = false;
 
 // Pewaktu non-blocking
 unsigned long lastSensorTime = 0;
@@ -26,11 +28,26 @@ unsigned long lastRelayTime = 0;
 unsigned long lastSerialLogTime = 0;
 
 void handleMenuNavigation() {
+    // Jika layar sedang mati/tidur (sleep mode)
+    if (!displayManager.isDisplayOn()) {
+        // Jika ada tombol ditekan, bangunkan layar dan abaikan aksi menu pada klik pertama ini
+        if (digitalRead(PIN_BUTTON_A) == LOW || digitalRead(PIN_BUTTON_B) == LOW) {
+            displayManager.setDisplayPower(true);
+            lastUserActivityTime = millis();
+            lastMenuInteraction = millis();
+            buttonA.update();
+            buttonB.update();
+            return;
+        }
+        return;
+    }
+
     ButtonEvent evtA = buttonA.update();
     ButtonEvent evtB = buttonB.update();
 
     if (evtA != BTN_EVENT_NONE || evtB != BTN_EVENT_NONE) {
         lastMenuInteraction = millis();
+        lastUserActivityTime = millis();
     }
 
     SystemSettings& settings = storage.getSettings();
@@ -125,6 +142,24 @@ void handleMenuNavigation() {
                 if (settings.tempOffset3 > MIN_ALLOWABLE_OFFSET) {
                     settings.tempOffset3 -= OFFSET_STEP_TENTHS;
                 }
+            } else if (evtA == BTN_EVENT_LONG_PRESS) {
+                // Tekan tahan A untuk lanjut ke menu setting Auto-Sleep OLED
+                currentMenu = MENU_SET_OLED_TIMEOUT;
+            } else if (evtB == BTN_EVENT_LONG_PRESS) {
+                storage.saveSettings();
+                currentMenu = MENU_DASHBOARD;
+            }
+            break;
+
+        case MENU_SET_OLED_TIMEOUT:
+            if (evtA == BTN_EVENT_SHORT_PRESS) {
+                if (settings.oledTimeoutMin < MAX_OLED_TIMEOUT_MIN) {
+                    settings.oledTimeoutMin++;
+                }
+            } else if (evtB == BTN_EVENT_SHORT_PRESS) {
+                if (settings.oledTimeoutMin > MIN_OLED_TIMEOUT_MIN) {
+                    settings.oledTimeoutMin--;
+                }
             } else if (evtA == BTN_EVENT_LONG_PRESS || evtB == BTN_EVENT_LONG_PRESS) {
                 // Simpan ke EEPROM dan kembali ke dashboard
                 storage.saveSettings();
@@ -133,11 +168,23 @@ void handleMenuNavigation() {
             break;
     }
 
-    // Auto-timeout: Jika di dalam menu dan tidak ada tombol ditekan selama 10 detik,
-    // simpan pengaturan dan otomatis kembali ke tampilan utama
+    // Auto-timeout Menu: Jika tidak ada tombol ditekan selama 10 detik,
+    // simpan pengaturan dan otomatis kembali ke tampilan dashboard
     if (currentMenu != MENU_DASHBOARD && (millis() - lastMenuInteraction > INTERVAL_MENU_TIMEOUT_MS)) {
         storage.saveSettings();
         currentMenu = MENU_DASHBOARD;
+    }
+
+    // Auto-sleep Layar OLED:
+    // Jika berada di dashboard dan waktu idle melebihi batas settingan (1 - 30 menit),
+    // matikan layar. Layar tidak akan dimatikan jika ada sensor error atau kipas sedang hidup.
+    if (currentMenu == MENU_DASHBOARD && displayManager.isDisplayOn()) {
+        unsigned long sleepTimeoutMs = (unsigned long)settings.oledTimeoutMin * 60000UL;
+        if (ectSensor.getData().isValid && !relayController.isFanOn()) {
+            if (millis() - lastUserActivityTime >= sleepTimeoutMs) {
+                displayManager.setDisplayPower(false);
+            }
+        }
     }
 }
 
@@ -164,6 +211,8 @@ void printSerialLog() {
     Serial.print((float)settings.tempOffset3 / 10.0f, 1);
     Serial.print(F("] | Fan: "));
     Serial.print(relayController.isFanOn() ? F("ON") : F("OFF"));
+    Serial.print(F(" | OLED: "));
+    Serial.print(displayManager.isDisplayOn() ? F("ON") : F("SLEEP"));
     if (!sensor.isValid) {
         Serial.print(F(" | ! FAIL-SAFE ACTIVE !"));
     }
@@ -189,6 +238,9 @@ void setup() {
         Serial.println(F("[ERROR] OLED Display tidak terdeteksi di 0x3C!"));
     }
 
+    lastUserActivityTime = millis();
+    lastFanState = false;
+
     Serial.println(F("System Ready."));
 }
 
@@ -209,6 +261,18 @@ void loop() {
     if (currentMillis - lastRelayTime >= INTERVAL_RELAY_UPDATE_MS) {
         lastRelayTime = currentMillis;
         relayController.update(ectSensor.getData(), storage.getSettings());
+
+        // Bangunkan layar secara otomatis jika ada kondisi krusial:
+        // - Sensor bermasalah (kabel putus atau korslet ke ground)
+        // - Kipas radiator baru saja terpicu menyala (suhu mencapai batas atas)
+        bool currentFanState = relayController.isFanOn();
+        if (!ectSensor.getData().isValid || (currentFanState && !lastFanState)) {
+            if (!displayManager.isDisplayOn()) {
+                displayManager.setDisplayPower(true);
+            }
+            lastUserActivityTime = currentMillis;
+        }
+        lastFanState = currentFanState;
     }
 
     // 4. Perbarui Tampilan OLED (setiap 120ms - no flicker, no lag)

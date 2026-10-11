@@ -9,7 +9,8 @@ enum MenuState {
     MENU_SET_TEMP_LOWER,
     MENU_CALIBRATE_OFFSET_1,
     MENU_CALIBRATE_OFFSET_2,
-    MENU_CALIBRATE_OFFSET_3
+    MENU_CALIBRATE_OFFSET_3,
+    MENU_SET_OLED_TIMEOUT
 };
 
 enum ButtonEvent {
@@ -25,6 +26,7 @@ struct SystemSettings {
     int16_t tempOffset1;    // Offset Zona 1 (dalam sepersepuluh °C, misal -100 = -10.0°C)
     int16_t tempOffset2;    // Offset Zona 2 (dalam sepersepuluh °C)
     int16_t tempOffset3;    // Offset Zona 3 (dalam sepersepuluh °C)
+    uint8_t oledTimeoutMin; // Waktu tunggu auto-sleep OLED (menit, 1 - 30)
     uint8_t checksum;       // Checksum sederhana untuk integritas data
 };
 
